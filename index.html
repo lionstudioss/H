@@ -1,1657 +1,1695 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Alarme Pro - Gestão Familiar Inteligente</title>
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <style>
-        :root {
-            --primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --primary-dark: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-            --secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            --warning: linear-gradient(135deg, #fdbb2d 0%, #22c1c3 100%);
-            --danger: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
-            --glass: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.2);
-            --text-primary: #1a202c;
-            --text-secondary: #4a5568;
-            --shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
-            --shadow-hover: 0 15px 45px rgba(31, 38, 135, 0.5);
-        }
-
-        .dark-theme {
-            --text-primary: #f7fafc;
-            --text-secondary: #cbd5e0;
-            --glass: rgba(15, 23, 42, 0.2);
-            --glass-border: rgba(255, 255, 255, 0.1);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            min-height: 100vh;
-            overflow-x: hidden;
-            position: relative;
-            color: var(--text-primary);
-        }
-
-        .light-theme {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 75%, #f5576c 100%);
-            background-attachment: fixed;
-        }
-
-        .dark-theme {
-            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 25%, #16213e 75%, #0f3460 100%);
-            background-attachment: fixed;
-        }
-
-        .container {
-            max-width: 420px;
-            margin: 0 auto;
-            min-height: 100vh;
-            background: var(--glass);
-            backdrop-filter: blur(30px);
-            box-shadow: var(--shadow);
-            border: 1px solid var(--glass-border);
-            position: relative;
-        }
-
-        .header {
-            padding: 25px 20px 20px;
-            text-align: center;
-            border-bottom: 1px solid var(--glass-border);
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .nav-buttons {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .nav-btn {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            width: 48px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: inherit;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-filter: blur(10px);
-        }
-
-        .nav-btn:hover {
-            background: var(--primary);
-            color: white;
-            transform: scale(1.05);
-            box-shadow: var(--shadow);
-        }
-
-        .current-time {
-            font-size: 3.5rem;
-            font-weight: 100;
-            margin-bottom: 8px;
-            font-variant-numeric: tabular-nums;
-            background: var(--primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: -2px;
-        }
-
-        .current-date {
-            font-size: 1rem;
-            opacity: 0.8;
-            text-transform: capitalize;
-            font-weight: 500;
-        }
-
-        .family-status {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-top: 15px;
-            padding: 8px 16px;
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            font-size: 0.9rem;
-            backdrop-filter: blur(10px);
-        }
-
-        .family-indicator {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--success);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .tab-navigation {
-            display: flex;
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: 25px;
-            margin: 20px;
-            padding: 6px;
-            backdrop-filter: blur(20px);
-            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .tab-btn {
-            flex: 1;
-            background: none;
-            border: none;
-            padding: 16px 8px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            color: inherit;
-            font-size: 0.9rem;
-            position: relative;
-        }
-
-        .tab-btn.active {
-            background: var(--primary);
-            color: white;
-            box-shadow: var(--shadow);
-            transform: translateY(-1px);
-        }
-
-        .content {
-            padding: 20px;
-            min-height: calc(100vh - 220px);
-        }
-
-        .view {
-            animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .card {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 25px;
-            margin-bottom: 20px;
-            backdrop-filter: blur(20px);
-            box-shadow: var(--shadow);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-        }
-
-        .card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-hover);
-        }
-
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background: var(--primary);
-            border-radius: 24px 0 0 24px;
-        }
-
-        .alarm-item {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 25px;
-            margin-bottom: 16px;
-            backdrop-filter: blur(20px);
-            box-shadow: var(--shadow);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .alarm-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background: var(--primary);
-        }
-
-        .alarm-item:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-hover);
-        }
-
-        .alarm-time {
-            font-size: 2.5rem;
-            font-weight: 200;
-            margin-bottom: 8px;
-            font-variant-numeric: tabular-nums;
-            background: var(--primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: -1px;
-        }
-
-        .btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 16px 32px;
-            border-radius: 20px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: var(--shadow);
-            border: 1px solid transparent;
-            font-family: inherit;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-hover);
-            filter: brightness(1.1);
-        }
-
-        .btn-secondary {
-            background: var(--glass);
-            color: var(--text-primary);
-            border: 1px solid var(--glass-border);
-            backdrop-filter: blur(10px);
-        }
-
-        .btn-danger {
-            background: var(--danger);
-        }
-
-        .btn-warning {
-            background: var(--warning);
-        }
-
-        .btn-success {
-            background: var(--success);
-        }
-
-        .form-container {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: 30px;
-            padding: 30px;
-            margin: 10px;
-            backdrop-filter: blur(30px);
-            box-shadow: var(--shadow);
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .form-input, .form-select {
-            width: 100%;
-            padding: 16px 20px;
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            font-size: 1rem;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            background: var(--glass);
-            color: inherit;
-            backdrop-filter: blur(10px);
-            font-family: inherit;
-        }
-
-        .form-input:focus, .form-select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            transform: translateY(-1px);
-        }
-
-        .floating-actions {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            z-index: 1000;
-        }
-
-        .floating-btn {
-            width: 64px;
-            height: 64px;
-            border-radius: 20px;
-            border: none;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: var(--shadow);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-        }
-
-        .floating-btn.primary {
-            background: var(--primary);
-        }
-
-        .floating-btn.family {
-            background: var(--secondary);
-        }
-
-        .floating-btn:hover {
-            transform: scale(1.1);
-            box-shadow: var(--shadow-hover);
-        }
-
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            backdrop-filter: blur(10px);
-        }
-
-        .modal-content {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            padding: 40px;
-            border-radius: 30px;
-            max-width: 420px;
-            width: 90%;
-            text-align: center;
-            backdrop-filter: blur(30px);
-            box-shadow: var(--shadow-hover);
-            color: var(--text-primary);
-        }
-
-        .family-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin: 20px 0;
-        }
-
-        .family-card {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 24px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-filter: blur(20px);
-        }
-
-        .family-card:hover {
-            transform: scale(1.02);
-            box-shadow: var(--shadow);
-        }
-
-        .family-icon {
-            width: 48px;
-            height: 48px;
-            margin: 0 auto 12px;
-            background: var(--primary);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-        }
-
-        .family-dashboard {
-            display: grid;
-            gap: 20px;
-            margin: 20px 0;
-        }
-
-        .dashboard-card {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 20px;
-            backdrop-filter: blur(20px);
-        }
-
-        .member-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .member-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            backdrop-filter: blur(10px);
-        }
-
-        .member-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            background: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-        }
-
-        .code-display {
-            background: var(--glass);
-            border: 2px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 20px;
-            margin: 20px 0;
-            text-align: center;
-            backdrop-filter: blur(20px);
-        }
-
-        .code-text {
-            font-size: 2rem;
-            font-weight: 700;
-            font-family: 'SF Mono', Consolas, monospace;
-            letter-spacing: 4px;
-            background: var(--primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .toggle-switch {
-            position: relative;
-            width: 56px;
-            height: 30px;
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: 15px;
-            cursor: pointer;
-            transition: 0.3s;
-            backdrop-filter: blur(10px);
-        }
-
-        .toggle-switch.active {
-            background: var(--primary);
-            border-color: transparent;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 24px;
-            height: 24px;
-            background: white;
-            border-radius: 50%;
-            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        .toggle-switch.active .toggle-slider {
-            transform: translateX(26px);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 80px 20px;
-            opacity: 0.6;
-        }
-
-        .empty-state svg {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 20px;
-            opacity: 0.4;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        .gradient-text {
-            background: var(--primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-weight: 700;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 12px;
-            margin-top: 24px;
-            flex-wrap: wrap;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 16px;
-            margin: 20px 0;
-        }
-
-        .stat-card {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 20px;
-            text-align: center;
-            backdrop-filter: blur(20px);
-        }
-
-        .stat-number {
-            font-size: 2rem;
-            font-weight: 200;
-            background: var(--primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 4px;
-        }
-
-        .notification {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            color: var(--text-primary);
-            padding: 16px 24px;
-            border-radius: 20px;
-            backdrop-filter: blur(30px);
-            box-shadow: var(--shadow);
-            z-index: 2000;
-            animation: slideDown 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        @keyframes slideDown {
-            from { transform: translateX(-50%) translateY(-100px); opacity: 0; }
-            to { transform: translateX(-50%) translateY(0); opacity: 1; }
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                max-width: 100%;
-                border-radius: 0;
-                border-left: none;
-                border-right: none;
-            }
-            
-            .floating-actions {
-                right: 20px;
-                bottom: 20px;
-            }
-            
-            .floating-btn {
-                width: 56px;
-                height: 56px;
-            }
-            
-            .current-time {
-                font-size: 3rem;
-            }
-
-            .family-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Alarme Pro - Gestão Familiar Inteligente</title>
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <style>
+    :root {
+      --primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --primary-dark: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+      --secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      --warning: linear-gradient(135deg, #fdbb2d 0%, #22c1c3 100%);
+      --danger: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+      --glass: rgba(255, 255, 255, 0.1);
+      --glass-border: rgba(255, 255, 255, 0.2);
+      --text-primary: #1a202c;
+      --text-secondary: #4a5568;
+      --shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+      --shadow-hover: 0 15px 45px rgba(31, 38, 135, 0.5);
+      font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    }
+    .dark-theme {
+      --text-primary: #f7fafc;
+      --text-secondary: #cbd5e0;
+      --glass: rgba(15, 23, 42, 0.2);
+      --glass-border: rgba(255, 255, 255, 0.1);
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: inherit;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      color: var(--text-primary);
+    }
+    body.light-theme {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 75%, #f5576c 100%);
+      background-attachment: fixed;
+    }
+    body.dark-theme {
+      background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 25%, #16213e 75%, #0f3460 100%);
+      background-attachment: fixed;
+    }
+    .container {
+      max-width: 420px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: var(--glass);
+      backdrop-filter: blur(30px);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--glass-border);
+      position: relative;
+      padding-bottom: 120px;
+    }
+    .header {
+      padding: 25px 20px 20px;
+      text-align: center;
+      border-bottom: 1px solid var(--glass-border);
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .nav-btn {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: inherit;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(10px);
+    }
+    .nav-btn:hover {
+      background: var(--primary);
+      color: white;
+      transform: scale(1.05);
+      box-shadow: var(--shadow);
+    }
+    .current-time {
+      font-size: 3.5rem;
+      font-weight: 100;
+      margin-bottom: 8px;
+      font-variant-numeric: tabular-nums;
+      background: var(--primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -2px;
+      user-select: none;
+    }
+    .current-date {
+      font-size: 1rem;
+      opacity: 0.8;
+      text-transform: capitalize;
+      font-weight: 500;
+      user-select: none;
+    }
+    .family-status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 15px;
+      padding: 8px 16px;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      font-size: 0.9rem;
+      backdrop-filter: blur(10px);
+      user-select: none;
+    }
+    .family-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .tab-navigation {
+      display: flex;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 25px;
+      margin: 20px;
+      padding: 6px;
+      backdrop-filter: blur(20px);
+      box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    .tab-btn {
+      flex: 1;
+      background: none;
+      border: none;
+      padding: 16px 8px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      color: inherit;
+      font-size: 0.9rem;
+      position: relative;
+      user-select: none;
+    }
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
+      box-shadow: var(--shadow);
+      transform: translateY(-1px);
+    }
+    .content {
+      padding: 20px;
+      min-height: calc(100vh - 220px);
+    }
+    .view {
+      animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 25px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-hover);
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--primary);
+      border-radius: 24px 0 0 24px;
+    }
+    .alarm-item {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 25px;
+      margin-bottom: 16px;
+      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    .alarm-item::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--primary);
+    }
+    .alarm-item:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+    .alarm-time {
+      font-size: 2.5rem;
+      font-weight: 200;
+      margin-bottom: 8px;
+      font-variant-numeric: tabular-nums;
+      background: var(--primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -1px;
+      user-select: none;
+    }
+    .btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 16px 32px;
+      border-radius: 20px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow);
+      border: 1px solid transparent;
+      font-family: inherit;
+      user-select: none;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+      filter: brightness(1.1);
+    }
+    .btn-secondary {
+      background: var(--glass);
+      color: var(--text-primary);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+    }
+    .btn-danger {
+      background: var(--danger);
+    }
+    .btn-warning {
+      background: var(--warning);
+    }
+    .btn-success {
+      background: var(--success);
+    }
+    .form-container {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 30px;
+      margin: 10px;
+      backdrop-filter: blur(30px);
+      box-shadow: var(--shadow);
+    }
+    .form-group {
+      margin-bottom: 24px;
+    }
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      user-select: none;
+    }
+    .form-input, .form-select {
+      width: 100%;
+      padding: 16px 20px;
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      font-size: 1rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      background: var(--glass);
+      color: inherit;
+      backdrop-filter: blur(10px);
+      font-family: inherit;
+    }
+    .form-input:focus, .form-select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      transform: translateY(-1px);
+    }
+    .floating-actions {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      z-index: 1000;
+    }
+    .floating-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 20px;
+      border: none;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .floating-btn.primary {
+      background: var(--primary);
+    }
+    .floating-btn.family {
+      background: var(--secondary);
+    }
+    .floating-btn:hover {
+      transform: scale(1.1);
+      box-shadow: var(--shadow-hover);
+    }
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      backdrop-filter: blur(10px);
+    }
+    .modal.hidden {
+      display: none !important;
+    }
+    .modal-content {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      padding: 40px;
+      border-radius: 30px;
+      max-width: 420px;
+      width: 90%;
+      text-align: center;
+      backdrop-filter: blur(30px);
+      box-shadow: var(--shadow-hover);
+      color: var(--text-primary);
+      user-select: text;
+    }
+    .family-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 20px 0;
+    }
+    .family-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(20px);
+      user-select: none;
+    }
+    .family-card:hover {
+      transform: scale(1.02);
+      box-shadow: var(--shadow);
+    }
+    .family-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 12px;
+      background: var(--primary);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+    .family-dashboard {
+      display: grid;
+      gap: 20px;
+      margin: 20px 0;
+    }
+    .dashboard-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 20px;
+      backdrop-filter: blur(20px);
+    }
+    .member-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .member-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+      user-select: none;
+    }
+    .member-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      user-select: none;
+    }
+    .code-display {
+      background: var(--glass);
+      border: 2px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 20px;
+      margin: 20px 0;
+      text-align: center;
+      backdrop-filter: blur(20px);
+      user-select: text;
+    }
+    .code-text {
+      font-size: 2rem;
+      font-weight: 700;
+      font-family: 'SF Mono', Consolas, monospace;
+      letter-spacing: 4px;
+      background: var(--primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      user-select: all;
+    }
+    .toggle-switch {
+      position: relative;
+      width: 56px;
+      height: 30px;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 15px;
+      cursor: pointer;
+      transition: 0.3s;
+      backdrop-filter: blur(10px);
+    }
+    .toggle-switch.active {
+      background: var(--primary);
+      border-color: transparent;
+    }
+    .toggle-slider {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 24px;
+      height: 24px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    .toggle-switch.active .toggle-slider {
+      transform: translateX(26px);
+    }
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      opacity: 0.6;
+    }
+    .empty-state svg {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 20px;
+      opacity: 0.4;
+    }
+    .hidden {
+      display: none !important;
+    }
+    .gradient-text {
+      background: var(--primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 700;
+    }
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 16px;
+      margin: 20px 0;
+    }
+    .stat-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      backdrop-filter: blur(20px);
+    }
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 200;
+      background: var(--primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 4px;
+      user-select: none;
+    }
+    .notification {
+      position: fixed;
+      top: 20px; left: 50%;
+      transform: translateX(-50%);
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      color: var(--text-primary);
+      padding: 16px 24px;
+      border-radius: 20px;
+      backdrop-filter: blur(30px);
+      box-shadow: var(--shadow);
+      z-index: 2000;
+      animation: slideDown 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      user-select: none;
+      font-weight: 600;
+      font-size: 1rem;
+      white-space: nowrap;
+    }
+    @keyframes slideDown {
+      from { transform: translateX(-50%) translateY(-100px); opacity: 0; }
+      to { transform: translateX(-50%) translateY(0); opacity: 1; }
+    }
+    .notification-permission-banner {
+      background: rgba(102, 126, 234, 0.1);
+      border: 1px solid rgba(102, 126, 234, 0.2);
+      border-radius: 20px;
+      padding: 16px;
+      margin: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(20px);
+    }
+    @media (max-width: 480px) {
+      .container {
+        max-width: 100%;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+      }
+      .floating-actions {
+        right: 20px;
+        bottom: 20px;
+      }
+      .floating-btn {
+        width: 56px;
+        height: 56px;
+      }
+      .current-time {
+        font-size: 3rem;
+      }
+      .family-grid {
+        grid-template-columns: 1fr;
+      }
+      .notification-permission-banner {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+      }
+    }
+  </style>
 </head>
 <body class="light-theme">
-    <div class="container">
-        <div class="header">
-            <div class="nav-buttons">
-                <button class="nav-btn" onclick="showStats()" title="Estatísticas">
-                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                    </svg>
-                </button>
-                
-                <div style="text-align: center;">
-                    <div class="current-time" id="currentTime">00:00</div>
-                    <div class="current-date" id="currentDate"></div>
-                    <div class="family-status" id="familyStatus" style="display: none;">
-                        <div class="family-indicator"></div>
-                        <span id="familyName">Família Silva</span>
-                    </div>
-                </div>
-                
-                <button class="nav-btn" onclick="toggleTheme()" title="Tema">
-                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                    </svg>
-                </button>
-            </div>
+  <div class="container">
+    <div class="header">
+      <div class="nav-buttons">
+        <button class="nav-btn" onclick="showStats()" title="Estatísticas" aria-label="Mostrar estatísticas">
+          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+        </button>
+        <div style="text-align: center;">
+          <div id="currentTime" class="current-time" aria-live="polite" aria-atomic="true">00:00</div>
+          <div id="currentDate" class="current-date" aria-live="polite" aria-atomic="true"></div>
+          <div id="familyStatus" class="family-status" style="display: none;">
+            <div class="family-indicator" aria-hidden="true"></div>
+            <span id="familyName"></span>
+          </div>
         </div>
+        <button class="nav-btn" onclick="toggleTheme()" title="Alterar tema" aria-label="Alterar tema claro ou escuro">
+          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
+        </button>
+      </div>
+    </div>
 
-        <div class="tab-navigation">
-            <button class="tab-btn active" onclick="showTab('alarms')">Alarmes</button>
-            <button class="tab-btn" onclick="showTab('family')">Família</button>
-            <button class="tab-btn" onclick="showTab('timer')">Timer</button>
-            <button class="tab-btn" onclick="showTab('sleep')">Sono</button>
+    <!-- Banner de permissão de notificações -->
+    <div id="notificationBanner" class="notification-permission-banner hidden">
+      <div>
+        <strong>🔔 Ative as notificações</strong>
+        <p style="font-size: 0.9rem; opacity: 0.8; margin-top: 4px;">Para receber alertas dos seus alarmes</p>
+      </div>
+      <button class="btn btn-secondary" onclick="requestNotificationPermission()" style="padding: 10px 20px; font-size: 0.85rem;">
+        Ativar
+      </button>
+    </div>
+
+    <nav class="tab-navigation" role="tablist" aria-label="Navegação de abas">
+      <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="alarmsTab" tabindex="0" onclick="showTab('alarms')">Alarmes</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="familyTab" tabindex="-1" onclick="showTab('family')">Família</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="timerTab" tabindex="-1" onclick="showTab('timer')">Timer</button>
+      <button class="tab-btn" role="tab" aria-selected="false" aria-controls="sleepTab" tabindex="-1" onclick="showTab('sleep')">Sono</button>
+    </nav>
+
+    <section class="content">
+      <section id="alarmsTab" class="view" role="tabpanel" aria-labelledby="tab-alarms">
+        <div id="alarmsList" aria-live="polite" aria-atomic="true"></div>
+        <div id="emptyState" class="empty-state hidden" aria-live="polite" aria-atomic="true">
+          <svg width="80" height="80" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12,6 12,12 16,14"></polyline>
+          </svg>
+          <h3 style="margin-bottom: 15px;">Nenhum alarme configurado</h3>
+          <p>Crie alarmes inteligentes para sua família</p>
         </div>
+      </section>
 
-        <div class="content">
-            <div id="alarmsTab" class="view">
-                <div id="alarmsList"></div>
-                <div id="emptyState" class="empty-state hidden">
-                    <svg width="80" height="80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12,6 12,12 16,14"></polyline>
-                    </svg>
-                    <h3 style="margin-bottom: 15px;">Nenhum alarme configurado</h3>
-                    <p>Crie alarmes inteligentes para sua família</p>
-                </div>
-            </div>
-
-            <div id="familyTab" class="view hidden">
-                <div id="familyHome">
-                    <div class="card">
-                        <h2 style="margin-bottom: 24px; text-align: center;" class="gradient-text">Gestão Familiar</h2>
-                        
-                        <div class="family-grid">
-                            <div class="family-card" onclick="showCreateFamily()">
-                                <div class="family-icon">
-                                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                                    </svg>
-                                </div>
-                                <h4 style="margin-bottom: 8px;">Criar Família</h4>
-                                <p style="font-size: 0.9rem; opacity: 0.7;">Nova família compartilhada</p>
-                            </div>
-                            
-                            <div class="family-card" onclick="showJoinFamily()">
-                                <div class="family-icon">
-                                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                    </svg>
-                                </div>
-                                <h4 style="margin-bottom: 8px;">Entrar na Família</h4>
-                                <p style="font-size: 0.9rem; opacity: 0.7;">Inserir código de acesso</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="familyDashboard" class="hidden">
-                    <div class="card">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                            <h2 class="gradient-text" id="dashboardFamilyName">Família Silva</h2>
-                            <button class="btn btn-secondary" onclick="leaveFamily()" style="padding: 8px 16px; font-size: 0.8rem;">Sair</button>
-                        </div>
-                        
-                        <div class="code-display">
-                            <p style="margin-bottom: 8px; font-size: 0.9rem; opacity: 0.7;">Código da Família</p>
-                            <div class="code-text" id="familyCodeDisplay">ABC123</div>
-                            <button class="btn btn-secondary" onclick="copyFamilyCode()" style="margin-top: 12px; padding: 8px 16px; font-size: 0.8rem;">Copiar Código</button>
-                        </div>
-                        
-                        <div class="dashboard-card">
-                            <h4 style="margin-bottom: 16px;">Membros da Família</h4>
-                            <div class="member-list" id="memberList">
-                                <div class="member-item">
-                                    <div class="member-avatar">J</div>
-                                    <div style="flex: 1;">
-                                        <div style="font-weight: 600;">João Silva</div>
-                                        <div style="font-size: 0.8rem; opacity: 0.7;">Admin</div>
-                                    </div>
-                                    <div style="color: #4ade80; font-size: 0.8rem;">Online</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="dashboard-card">
-                            <h4 style="margin-bottom: 16px;">Alarmes da Família</h4>
-                            <div id="familyAlarmsList">
-                                <div class="empty-state" style="padding: 40px 20px;">
-                                    <p>Nenhum alarme familiar criado</p>
-                                </div>
-                            </div>
-                            <button class="btn" onclick="showFamilyAlarmForm()" style="width: 100%; margin-top: 16px;">
-                                Criar Alarme Familiar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="timerTab" class="view hidden">
-                <div class="card">
-                    <h2 style="text-align: center; margin-bottom: 30px;" class="gradient-text">Timer</h2>
-                    <div style="text-align: center;">
-                        <div style="font-size: 4rem; font-weight: 100; margin: 40px 0; font-variant-numeric: tabular-nums; background: var(--primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;" id="timerDisplay">05:00</div>
-                        
-                        <div style="display: flex; gap: 12px; justify-content: center; margin-bottom: 30px;">
-                            <div style="display: flex; flex-direction: column; align-items: center;">
-                                <label style="font-size: 0.8rem; margin-bottom: 8px; color: var(--text-secondary);">MIN</label>
-                                <input type="number" id="timerMinutes" min="0" max="59" value="5" style="width: 60px; text-align: center; font-size: 1.2rem; padding: 8px; border: 1px solid var(--glass-border); border-radius: 12px; background: var(--glass); color: inherit;">
-                            </div>
-                            <div style="display: flex; flex-direction: column; align-items: center;">
-                                <label style="font-size: 0.8rem; margin-bottom: 8px; color: var(--text-secondary);">SEG</label>
-                                <input type="number" id="timerSeconds" min="0" max="59" value="0" style="width: 60px; text-align: center; font-size: 1.2rem; padding: 8px; border: 1px solid var(--glass-border); border-radius: 12px; background: var(--glass); color: inherit;">
-                            </div>
-                        </div>
-                        
-                        <div class="action-buttons" style="justify-content: center;">
-                            <button class="btn btn-success" id="timerStartBtn" onclick="startTimer()">Iniciar</button>
-                            <button class="btn btn-warning hidden" id="timerPauseBtn" onclick="pauseTimer()">Pausar</button>
-                            <button class="btn btn-secondary" onclick="resetTimer()">Reset</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="sleepTab" class="view hidden">
-                <div class="card">
-                    <h2 style="text-align: center; margin-bottom: 20px;" class="gradient-text">Calculadora de Sono</h2>
-                    <p style="text-align: center; margin-bottom: 30px; opacity: 0.7;">Descubra o melhor horário para dormir</p>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Que horas quer acordar?</label>
-                        <input type="time" id="targetWakeTime" class="form-input" value="07:00" style="text-align: center; font-size: 1.3rem;">
-                    </div>
-                    
-                    <div id="sleepRecommendations" style="margin-top: 20px;"></div>
-                    
-                    <button class="btn" onclick="createSleepAlarms()" style="width: 100%; margin-top: 20px;">
-                        Criar Alarmes de Sono
-                    </button>
-                </div>
-            </div>
-
-            <div id="alarmForm" class="view hidden">
-                <div class="form-container">
-                    <h2 id="formTitle" style="margin-bottom: 30px; text-align: center;" class="gradient-text">Novo Alarme</h2>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Horário</label>
-                        <input type="time" id="alarmTime" class="form-input" value="07:00" style="text-align: center; font-size: 1.5rem;">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Nome</label>
-                        <input type="text" id="alarmLabel" class="form-input" placeholder="Ex: Trabalho, Escola..." value="Despertar">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Som</label>
-                        <select id="alarmSound" class="form-select">
-                            <option value="classico">Clássico</option>
-                            <option value="suave">Suave</option>
-                            <option value="energetico">Energético</option>
-                            <option value="natureza">Natureza</option>
-                        </select>
-                    </div>
-                    
-                    <div class="action-buttons">
-                        <button class="btn" onclick="saveAlarm()" style="flex: 2;">Salvar</button>
-                        <button class="btn btn-secondary" onclick="showTab('alarms')" style="flex: 1;">Cancelar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="floating-actions">
-            <button class="floating-btn family" onclick="showTab('family')" title="Família">
-                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                </svg>
-            </button>
-            <button class="floating-btn primary" onclick="showAlarmForm()" title="Novo Alarme">
-                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <section id="familyTab" class="view hidden" role="tabpanel" aria-labelledby="tab-family">
+        <div id="familyHome">
+          <div class="card">
+            <h2 class="gradient-text" style="margin-bottom: 24px; text-align: center;">Gestão Familiar</h2>
+            <div class="family-grid" role="group" aria-label="Opções de família">
+              <div tabindex="0" class="family-card" onclick="showCreateFamily()" onkeypress="if(event.key==='Enter') showCreateFamily()" role="button" aria-label="Criar nova família">
+                <div class="family-icon">
+                  <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-            </button>
+                  </svg>
+                </div>
+                <h4 style="margin-bottom: 8px;">Criar Família</h4>
+                <p style="font-size: 0.9rem; opacity: 0.7;">Nova família compartilhada</p>
+              </div>
+              <div tabindex="0" class="family-card" onclick="showJoinFamily()" onkeypress="if(event.key==='Enter') showJoinFamily()" role="button" aria-label="Entrar na família existente">
+                <div class="family-icon">
+                  <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                  </svg>
+                </div>
+                <h4 style="margin-bottom: 8px;">Entrar na Família</h4>
+                <p style="font-size: 0.9rem; opacity: 0.7;">Inserir código de acesso</p>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <div id="familyDashboard" class="hidden">
+          <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+              <h2 class="gradient-text" id="dashboardFamilyName">Família Silva</h2>
+              <button class="btn btn-secondary" onclick="leaveFamily()" style="padding: 10px 18px; font-size: 0.85rem;">Sair</button>
+            </div>
+            <div class="code-display" aria-label="Código da família">
+              <p style="margin-bottom: 8px; font-size: 0.9rem; opacity: 0.7;">Código da Família</p>
+              <div class="code-text" id="familyCodeDisplay" tabindex="0"></div>
+              <button class="btn btn-secondary" onclick="copyFamilyCode()" style="margin-top: 12px; padding: 10px 20px; font-size: 0.85rem;">Copiar Código</button>
+            </div>
+            <div class="dashboard-card" aria-label="Lista de membros da família">
+              <h4 style="margin-bottom: 18px;">Membros da Família</h4>
+              <div class="member-list" id="memberList" aria-live="polite" aria-atomic="true"></div>
+            </div>
+            <div class="dashboard-card" aria-label="Alarmes da família">
+              <h4 style="margin-bottom: 18px;">Alarmes da Família</h4>
+              <div id="familyAlarmsList"></div>
+              <button class="btn" onclick="showFamilyAlarmForm()" style="width: 100%; margin-top: 20px;">
+                Criar Alarme Familiar
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="timerTab" class="view hidden" role="tabpanel" aria-labelledby="tab-timer">
+        <div class="card" role="region" aria-label="Timer">
+          <h2 class="gradient-text" style="text-align: center; margin-bottom: 30px;">Timer</h2>
+          <div style="text-align: center;">
+            <div id="timerDisplay" style="font-size: 4rem; font-weight: 300; margin: 40px 0; font-variant-numeric: tabular-nums; background: var(--primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+              05:00
+            </div>
+            <div style="display: flex; gap: 12px; justify-content: center; margin-bottom: 30px;" role="group" aria-label="Configuração do Timer">
+              <div style="display: flex; flex-direction: column; align-items: center;">
+                <label for="timerMinutes" style="font-size: 0.8rem; margin-bottom: 8px; color: var(--text-secondary);">MIN</label>
+                <input type="number" id="timerMinutes" min="0" max="59" value="5" style="width: 60px; text-align: center; font-size: 1.2rem; padding: 8px; border: 1px solid var(--glass-border); border-radius: 12px; background: var(--glass); color: inherit;" aria-label="Minutos do timer" />
+              </div>
+              <div style="display: flex; flex-direction: column; align-items: center;">
+                <label for="timerSeconds" style="font-size: 0.8rem; margin-bottom: 8px; color: var(--text-secondary);">SEG</label>
+                <input type="number" id="timerSeconds" min="0" max="59" value="0" style="width: 60px; text-align: center; font-size: 1.2rem; padding: 8px; border: 1px solid var(--glass-border); border-radius: 12px; background: var(--glass); color: inherit;" aria-label="Segundos do timer" />
+              </div>
+            </div>
+            <div class="action-buttons" style="justify-content: center;">
+              <button class="btn btn-success" id="timerStartBtn" onclick="startTimer()" aria-live="polite" aria-label="Iniciar timer">Iniciar</button>
+              <button class="btn btn-warning hidden" id="timerPauseBtn" onclick="pauseTimer()" aria-live="polite" aria-label="Pausar timer">Pausar</button>
+              <button class="btn btn-secondary" onclick="resetTimer()" aria-live="polite" aria-label="Resetar timer">Reset</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="sleepTab" class="view hidden" role="tabpanel" aria-labelledby="tab-sleep">
+        <div class="card" role="region" aria-label="Calculadora de Sono">
+          <h2 class="gradient-text" style="text-align: center; margin-bottom: 20px;">Calculadora de Sono</h2>
+          <p style="text-align: center; margin-bottom: 30px; opacity: 0.7;">Descubra o melhor horário para dormir</p>
+          <div class="form-group">
+            <label for="targetWakeTime" class="form-label">Que horas quer acordar?</label>
+            <input type="time" id="targetWakeTime" class="form-input" value="07:00" style="text-align: center; font-size: 1.3rem;" aria-label="Horário para acordar" />
+          </div>
+          <div id="sleepRecommendations" aria-live="polite" aria-atomic="true" style="margin-top: 20px;"></div>
+          <button class="btn" onclick="createSleepAlarms()" style="width: 100%; margin-top: 20px;" aria-label="Criar alarmes de sono">
+            Criar Alarmes de Sono
+          </button>
+        </div>
+      </section>
+
+      <section id="alarmForm" class="view hidden" role="dialog" aria-modal="true" aria-labelledby="formTitle">
+        <div class="form-container">
+          <h2 id="formTitle" style="margin-bottom: 30px; text-align: center;" class="gradient-text">Novo Alarme</h2>
+          <div class="form-group">
+            <label for="alarmTime" class="form-label">Horário</label>
+            <input type="time" id="alarmTime" class="form-input" value="07:00" aria-required="true" />
+          </div>
+          <div class="form-group">
+            <label for="alarmLabel" class="form-label">Nome</label>
+            <input type="text" id="alarmLabel" class="form-input" placeholder="Ex: Trabalho, Escola..." value="Despertar" aria-required="true" />
+          </div>
+          <div class="form-group">
+            <label for="alarmSound" class="form-label">Som</label>
+            <select id="alarmSound" class="form-select" aria-required="true">
+              <option value="classico">Clássico</option>
+              <option value="suave">Suave</option>
+              <option value="energetico">Energético</option>
+              <option value="natureza">Natureza</option>
+            </select>
+          </div>
+          <div class="action-buttons">
+            <button class="btn" onclick="saveAlarm()" style="flex: 2;" aria-label="Salvar alarme">Salvar</button>
+            <button class="btn btn-secondary" onclick="showTab('alarms')" style="flex: 1;" aria-label="Cancelar e voltar para alarmes">Cancelar</button>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <div class="floating-actions" role="region" aria-label="Ações rápidas">
+      <button class="floating-btn family" onclick="showTab('family')" title="Família" aria-label="Ir para gestão da família">
+        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 515.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 919.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+      </button>
+      <button class="floating-btn primary" onclick="showAlarmForm()" title="Novo Alarme" aria-label="Criar novo alarme">
+        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+      </button>
     </div>
 
-    <!-- Modals -->
-    <div id="statsModal" class="modal hidden">
-        <div class="modal-content">
-            <h3 class="gradient-text" style="margin-bottom: 30px; font-size: 1.5rem;">Estatísticas</h3>
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number" id="alarmsUsedCount">12</div>
-                    <div style="font-size: 0.8rem;">Alarmes</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="avgSleepTime">7.5h</div>
-                    <div style="font-size: 0.8rem;">Sono Médio</div>
-                </div>
-            </div>
-            <button class="btn" onclick="hideStats()">Fechar</button>
+    <!-- Modais -->
+    <div id="statsModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="statsTitle" tabindex="-1">
+      <div class="modal-content">
+        <h3 id="statsTitle" class="gradient-text" style="margin-bottom: 30px; font-size: 1.5rem;">Estatísticas</h3>
+        <div class="stats-grid" aria-live="polite" aria-atomic="true">
+          <div class="stat-card">
+            <div id="alarmsUsedCount" class="stat-number">0</div>
+            <div style="font-size: 0.8rem;">Alarmes</div>
+          </div>
+          <div class="stat-card">
+            <div id="avgSleepTime" class="stat-number">0h</div>
+            <div style="font-size: 0.8rem;">Sono Médio</div>
+          </div>
         </div>
+        <button class="btn" onclick="hideStats()" aria-label="Fechar estatísticas">Fechar</button>
+      </div>
     </div>
 
-    <div id="createFamilyModal" class="modal hidden">
-        <div class="modal-content">
-            <h3 class="gradient-text" style="margin-bottom: 20px;">Criar Nova Família</h3>
-            <div class="form-group">
-                <label class="form-label">Nome da Família</label>
-                <input type="text" id="newFamilyName" class="form-input" placeholder="Ex: Família Silva">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Seu Nome</label>
-                <input type="text" id="adminName" class="form-input" placeholder="Seu nome">
-            </div>
-            <div class="action-buttons">
-                <button class="btn" onclick="createFamily()">Criar</button>
-                <button class="btn btn-secondary" onclick="hideCreateFamily()">Cancelar</button>
-            </div>
+    <div id="createFamilyModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="createFamilyTitle" tabindex="-1">
+      <div class="modal-content">
+        <h3 id="createFamilyTitle" class="gradient-text" style="margin-bottom: 20px;">Criar Nova Família</h3>
+        <div class="form-group">
+          <label for="newFamilyName" class="form-label">Nome da Família</label>
+          <input type="text" id="newFamilyName" class="form-input" placeholder="Ex: Família Silva" aria-required="true" />
         </div>
+        <div class="form-group">
+          <label for="adminName" class="form-label">Seu Nome</label>
+          <input type="text" id="adminName" class="form-input" placeholder="Seu nome" aria-required="true" />
+        </div>
+        <div class="action-buttons">
+          <button class="btn" onclick="createFamily()" aria-label="Criar família">Criar</button>
+          <button class="btn btn-secondary" onclick="hideCreateFamily()" aria-label="Cancelar criação de família">Cancelar</button>
+        </div>
+      </div>
     </div>
 
-    <div id="joinFamilyModal" class="modal hidden">
-        <div class="modal-content">
-            <h3 class="gradient-text" style="margin-bottom: 20px;">Entrar na Família</h3>
-            <div class="form-group">
-                <label class="form-label">Código da Família</label>
-                <input type="text" id="familyCode" class="form-input" placeholder="ABC123" style="text-align: center; text-transform: uppercase; letter-spacing: 2px; font-family: monospace;">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Seu Nome</label>
-                <input type="text" id="memberName" class="form-input" placeholder="Seu nome">
-            </div>
-            <div class="action-buttons">
-                <button class="btn" onclick="joinFamily()">Entrar</button>
-                <button class="btn btn-secondary" onclick="hideJoinFamily()">Cancelar</button>
-            </div>
+    <div id="joinFamilyModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="joinFamilyTitle" tabindex="-1">
+      <div class="modal-content">
+        <h3 id="joinFamilyTitle" class="gradient-text" style="margin-bottom: 20px;">Entrar na Família</h3>
+        <div class="form-group">
+          <label for="familyCode" class="form-label">Código da Família</label>
+          <input type="text" id="familyCode" class="form-input" placeholder="ABC123" style="text-transform: uppercase; letter-spacing: 2px; font-family: monospace;" aria-required="true" />
         </div>
+        <div class="form-group">
+          <label for="memberName" class="form-label">Seu Nome</label>
+          <input type="text" id="memberName" class="form-input" placeholder="Seu nome" aria-required="true" />
+        </div>
+        <div class="action-buttons">
+          <button class="btn" onclick="joinFamily()" aria-label="Entrar na família">Entrar</button>
+          <button class="btn btn-secondary" onclick="hideJoinFamily()" aria-label="Cancelar entrada na família">Cancelar</button>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <script>
-        // Variáveis globais
-        let alarms = [];
-        let familyData = null;
-        let currentUser = null;
-        let editingAlarm = null;
-        let isDarkMode = false;
-        let currentTab = 'alarms';
-        let timerInterval = null;
-        let timerSeconds = 0;
-        let isTimerRunning = false;
-        let audioContext = null;
-        let currentSound = null;
-        
-        const stats = {
-            alarmsUsed: 0,
-            avgSleepTime: 7.5
-        };
+  <script>
+    // ===== VARIÁVEIS GLOBAIS =====
+    let alarms = [];
+    let familyData = null;
+    let currentUser = null;
+    let editingAlarm = null;
+    let isDarkMode = false;
+    let currentTab = 'alarms';
+    let timerInterval = null;
+    let timerSeconds = 0;
+    let isTimerRunning = false;
+    let audioContext = null;
+    let currentSound = null;
+    let notificationPermissionGranted = false;
 
-        // Funções de armazenamento local
-        function saveToStorage() {
-            const data = {
-                alarms: alarms,
-                familyData: familyData,
-                currentUser: currentUser,
-                stats: stats,
-                isDarkMode: isDarkMode,
-                currentTab: currentTab
-            };
-            try {
-                const dataStr = JSON.stringify(data);
-                document.cookie = `alarmePro=${encodeURIComponent(dataStr)}; expires=Fri, 31 Dec 2099 23:59:59 GMT; path=/`;
-            } catch (e) {
-                console.error('Erro ao salvar dados:', e);
-            }
-        }
+    const stats = {
+      alarmsUsed: 0,
+      avgSleepTime: 7.5
+    };
 
-        function loadFromStorage() {
-            try {
-                const cookies = document.cookie.split(';');
-                const alarmeCookie = cookies.find(cookie => cookie.trim().startsWith('alarmePro='));
-                
-                if (alarmeCookie) {
-                    const dataStr = decodeURIComponent(alarmeCookie.split('=')[1]);
-                    const data = JSON.parse(dataStr);
-                    
-                    alarms = data.alarms || [];
-                    familyData = data.familyData || null;
-                    currentUser = data.currentUser || null;
-                    Object.assign(stats, data.stats || {});
-                    isDarkMode = data.isDarkMode || false;
-                    currentTab = data.currentTab || 'alarms';
-                }
-            } catch (e) {
-                console.error('Erro ao carregar dados:', e);
-                // Se houver erro, inicia com dados vazios
-                alarms = [];
-                familyData = null;
-                currentUser = null;
-            }
-        }
+    // ===== GERENCIAMENTO DE PERMISSÕES DE NOTIFICAÇÕES =====
+    function checkNotificationSupport() {
+      return 'Notification' in window;
+    }
 
-        function generateFamilyCode() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let code = '';
-            for (let i = 0; i < 6; i++) {
-                code += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return code;
-        }
+    function checkNotificationPermission() {
+      if (!checkNotificationSupport()) {
+        return 'not-supported';
+      }
+      return Notification.permission;
+    }
 
-        function initAudio() {
-            if (!audioContext) {
-                try {
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                } catch (e) {
-                    console.log('Audio não suportado');
-                }
-            }
-        }
+    function requestNotificationPermission() {
+      if (!checkNotificationSupport()) {
+        showNotification('Erro', 'Seu navegador não suporta notificações');
+        return;
+      }
 
-        function playAlarmSound(soundType, volume = 0.3) {
-            if (!audioContext) return;
-            
-            if (currentSound) {
-                try {
-                    currentSound.stop();
-                } catch (e) {}
-            }
+      // Se já foi concedida, apenas confirma
+      if (Notification.permission === 'granted') {
+        notificationPermissionGranted = true;
+        hideNotificationBanner();
+        showNotification('Sucesso', 'Permissão para notificações já está ativa!');
+        return;
+      }
 
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            switch(soundType) {
-                case 'classico':
-                    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-                    break;
-                case 'suave':
-                    oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
-                    oscillator.type = 'sine';
-                    break;
-                case 'energetico':
-                    oscillator.frequency.setValueAtTime(1000, audioContext.currentTime);
-                    oscillator.type = 'square';
-                    break;
-                case 'natureza':
-                    oscillator.frequency.setValueAtTime(330, audioContext.currentTime);
-                    oscillator.type = 'triangle';
-                    break;
-            }
-            
-            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-            gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.1);
-            
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 1);
-            
-            currentSound = oscillator;
-        }
+      // Se foi negada, instrui o usuário
+      if (Notification.permission === 'denied') {
+        showNotification('Permissão Negada', 'Ative as notificações nas configurações do navegador');
+        return;
+      }
 
-        function updateTime() {
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString('pt-BR', { 
-                hour: '2-digit', 
-                minute: '2-digit',
-                hour12: false 
-            });
-            const dateStr = now.toLocaleDateString('pt-BR', { 
-                weekday: 'long', 
-                day: 'numeric', 
-                month: 'long' 
-            });
-            
-            document.getElementById('currentTime').textContent = timeStr;
-            document.getElementById('currentDate').textContent = dateStr;
-            
-            checkAlarms(now);
-        }
-
-        function checkAlarms(now) {
-            const currentTimeStr = now.toTimeString().slice(0, 5);
-            const currentDay = now.getDay();
-            
-            alarms.forEach((alarm, index) => {
-                if (alarm.enabled && alarm.time === currentTimeStr) {
-                    if (alarm.repeat.length === 0 || alarm.repeat.includes(currentDay)) {
-                        triggerAlarm(alarm);
-                        if (alarm.repeat.length === 0) {
-                            alarms.splice(index, 1);
-                            stats.alarmsUsed++;
-                            saveToStorage();
-                            renderAlarms();
-                        }
-                    }
-                }
-            });
-        }
-
-        function triggerAlarm(alarm) {
-            playAlarmSound(alarm.sound, 0.5);
-            
-            if ('vibrate' in navigator) {
-                navigator.vibrate([300, 100, 300, 100, 300]);
-            }
-            
-            showNotification(`Alarme: ${alarm.label}`, alarm.time);
-            
-            setTimeout(() => {
-                if (confirm(`Alarme: ${alarm.label}\n${alarm.time}\n\nParar alarme?`)) {
-                    if (currentSound) {
-                        try {
-                            currentSound.stop();
-                        } catch (e) {}
-                    }
-                }
-            }, 1000);
-        }
-
-        function showNotification(title, message) {
-            const notification = document.createElement('div');
-            notification.className = 'notification';
-            notification.innerHTML = `
-                <div style="font-weight: 600; margin-bottom: 4px;">${title}</div>
-                <div style="font-size: 0.9rem; opacity: 0.8;">${message}</div>
-            `;
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.remove();
-                }
-            }, 4000);
-        }
-
-        function toggleTheme() {
-            isDarkMode = !isDarkMode;
-            document.body.className = isDarkMode ? 'dark-theme' : 'light-theme';
-            saveToStorage();
-            
-            const themeIcon = document.querySelector('[onclick="toggleTheme()"] svg path');
-            if (themeIcon) {
-                if (isDarkMode) {
-                    themeIcon.setAttribute('d', 'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z');
-                } else {
-                    themeIcon.setAttribute('d', 'M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z');
-                }
-            }
-        }
-
-        function showTab(tabName) {
-            currentTab = tabName;
-            saveToStorage();
-            
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            const targetTab = document.querySelector(`[onclick="showTab('${tabName}')"]`);
-            if (targetTab) targetTab.classList.add('active');
-            
-            document.querySelectorAll('.view').forEach(view => view.classList.add('hidden'));
-            const targetView = document.getElementById(`${tabName}Tab`);
-            if (targetView) targetView.classList.remove('hidden');
-            
-            if (tabName === 'alarms') {
-                renderAlarms();
-            } else if (tabName === 'sleep') {
-                calculateSleepRecommendations();
-            } else if (tabName === 'family') {
-                renderFamilyView();
-            }
-        }
-
-        function showView(viewId) {
-            document.querySelectorAll('.view').forEach(view => view.classList.add('hidden'));
-            const targetView = document.getElementById(viewId);
-            if (targetView) targetView.classList.remove('hidden');
-        }
-
-        function showAlarmForm(alarm = null) {
-            editingAlarm = alarm;
-            document.getElementById('formTitle').textContent = alarm ? 'Editar Alarme' : 'Novo Alarme';
-            
-            if (alarm) {
-                document.getElementById('alarmTime').value = alarm.time;
-                document.getElementById('alarmLabel').value = alarm.label;
-                document.getElementById('alarmSound').value = alarm.sound;
-            } else {
-                document.getElementById('alarmTime').value = '07:00';
-                document.getElementById('alarmLabel').value = 'Despertar';
-                document.getElementById('alarmSound').value = 'classico';
-            }
-            
-            showView('alarmForm');
-        }
-
-        function saveAlarm() {
-            const time = document.getElementById('alarmTime').value;
-            const label = document.getElementById('alarmLabel').value || 'Alarme';
-            const sound = document.getElementById('alarmSound').value;
-            
-            const alarmData = {
-                time,
-                label,
-                sound,
-                enabled: true,
-                repeat: [],
-                familyAlarm: false
-            };
-            
-            if (editingAlarm) {
-                const index = alarms.findIndex(a => a.id === editingAlarm.id);
-                if (index !== -1) {
-                    alarms[index] = { ...alarmData, id: editingAlarm.id };
-                }
-            } else {
-                alarms.push({ ...alarmData, id: Date.now() });
-            }
-            
-            editingAlarm = null;
-            saveToStorage();
-            renderAlarms();
-            showTab('alarms');
-            showNotification('Sucesso', 'Alarme salvo com sucesso!');
-        }
-
-        function renderAlarms() {
-            const container = document.getElementById('alarmsList');
-            const emptyState = document.getElementById('emptyState');
-            
-            if (!container || !emptyState) return;
-            
-            if (alarms.length === 0) {
-                container.innerHTML = '';
-                emptyState.classList.remove('hidden');
-                return;
-            }
-            
-            emptyState.classList.add('hidden');
-            
-            container.innerHTML = alarms.map(alarm => `
-                <div class="alarm-item">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <div style="flex: 1;">
-                            <div class="alarm-time">${alarm.time}</div>
-                            <div style="margin-bottom: 8px; font-weight: 600; font-size: 1.1rem;">${alarm.label}</div>
-                            ${alarm.familyAlarm ? '<div style="font-size: 0.8rem; color: #f093fb; font-weight: 600;">👨‍👩‍👧‍👦 Alarme Familiar</div>' : ''}
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <button onclick="editAlarm(${alarm.id})" style="background: var(--glass); border: 1px solid var(--glass-border); cursor: pointer; padding: 10px; border-radius: 12px; color: inherit;">
-                                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                </svg>
-                            </button>
-                            <button onclick="deleteAlarm(${alarm.id})" style="background: var(--glass); border: 1px solid var(--glass-border); cursor: pointer; padding: 10px; color: #ff416c; border-radius: 12px;">
-                                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                </svg>
-                            </button>
-                            <div class="toggle-switch ${alarm.enabled ? 'active' : ''}" onclick="toggleAlarm(${alarm.id})">
-                                <div class="toggle-slider"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function editAlarm(id) {
-            const alarm = alarms.find(a => a.id === id);
-            if (alarm) {
-                showAlarmForm(alarm);
-            }
-        }
-
-        function deleteAlarm(id) {
-            if (confirm('Deseja excluir este alarme?')) {
-                alarms = alarms.filter(alarm => alarm.id !== id);
-                saveToStorage();
-                renderAlarms();
-                showNotification('Sucesso', 'Alarme excluído!');
-            }
-        }
-
-        function toggleAlarm(id) {
-            const alarm = alarms.find(a => a.id === id);
-            if (alarm) {
-                alarm.enabled = !alarm.enabled;
-                saveToStorage();
-                renderAlarms();
-            }
-        }
-
-        // Funções da família
-        function renderFamilyView() {
-            if (familyData) {
-                document.getElementById('familyHome').classList.add('hidden');
-                document.getElementById('familyDashboard').classList.remove('hidden');
-                updateFamilyDashboard();
-            } else {
-                document.getElementById('familyHome').classList.remove('hidden');
-                document.getElementById('familyDashboard').classList.add('hidden');
-            }
-        }
-
-        function showCreateFamily() {
-            document.getElementById('createFamilyModal').classList.remove('hidden');
-        }
-
-        function hideCreateFamily() {
-            document.getElementById('createFamilyModal').classList.add('hidden');
-        }
-
-        function showJoinFamily() {
-            document.getElementById('joinFamilyModal').classList.remove('hidden');
-        }
-
-        function hideJoinFamily() {
-            document.getElementById('joinFamilyModal').classList.add('hidden');
-        }
-
-        function createFamily() {
-            const familyName = document.getElementById('newFamilyName').value;
-            const adminName = document.getElementById('adminName').value;
-            
-            if (!familyName || !adminName) {
-                showNotification('Erro', 'Preencha todos os campos');
-                return;
-            }
-            
-            const familyCode = generateFamilyCode();
-            
-            familyData = {
-                name: familyName,
-                code: familyCode,
-                admin: adminName,
-                members: [
-                    { name: adminName, role: 'Admin', id: 1, online: true }
-                ],
-                alarms: []
-            };
-            
-            currentUser = { name: adminName, role: 'Admin', id: 1 };
-            
-            document.getElementById('familyStatus').style.display = 'flex';
-            document.getElementById('familyName').textContent = familyName;
-            
-            saveToStorage();
-            hideCreateFamily();
-            renderFamilyView();
-            showNotification('Sucesso', `Família "${familyName}" criada! Código: ${familyCode}`);
-        }
-
-        function joinFamily() {
-            const familyCode = document.getElementById('familyCode').value.toUpperCase();
-            const memberName = document.getElementById('memberName').value;
-            
-            if (!familyCode || !memberName) {
-                showNotification('Erro', 'Preencha todos os campos');
-                return;
-            }
-            
-            // Simular entrada na família
-            familyData = {
-                name: 'Família Silva',
-                code: familyCode,
-                admin: 'João Silva',
-                members: [
-                    { name: 'João Silva', role: 'Admin', id: 1, online: true },
-                    { name: memberName, role: 'Membro', id: 2, online: true }
-                ],
-                alarms: []
-            };
-            
-            currentUser = { name: memberName, role: 'Membro', id: 2 };
-            
-            document.getElementById('familyStatus').style.display = 'flex';
-            document.getElementById('familyName').textContent = 'Família Silva';
-            
-            saveToStorage();
-            hideJoinFamily();
-            renderFamilyView();
-            showNotification('Sucesso', `Bem-vindo à Família Silva!`);
-        }
-
-        function updateFamilyDashboard() {
-            if (!familyData) return;
-            
-            document.getElementById('dashboardFamilyName').textContent = familyData.name;
-            document.getElementById('familyCodeDisplay').textContent = familyData.code;
-            
-            const memberList = document.getElementById('memberList');
-            memberList.innerHTML = familyData.members.map(member => `
-                <div class="member-item">
-                    <div class="member-avatar">${member.name.charAt(0)}</div>
-                    <div style="flex: 1;">
-                        <div style="font-weight: 600;">${member.name}</div>
-                        <div style="font-size: 0.8rem; opacity: 0.7;">${member.role}</div>
-                    </div>
-                    <div style="color: ${member.online ? '#4ade80' : '#64748b'}; font-size: 0.8rem;">
-                        ${member.online ? 'Online' : 'Offline'}
-                    </div>
-                </div>
-            `).join('');
-            
-            renderFamilyAlarms();
-        }
-
-        function renderFamilyAlarms() {
-            const container = document.getElementById('familyAlarmsList');
-            const familyAlarms = alarms.filter(alarm => alarm.familyAlarm);
-            
-            if (familyAlarms.length === 0) {
-                container.innerHTML = '<div class="empty-state" style="padding: 40px 20px;"><p>Nenhum alarme familiar criado</p></div>';
-                return;
-            }
-            
-            container.innerHTML = familyAlarms.map(alarm => `
-                <div class="alarm-item" style="margin-bottom: 12px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <div style="font-size: 1.3rem; font-weight: 600; margin-bottom: 4px;">${alarm.time}</div>
-                            <div style="font-size: 0.9rem;">${alarm.label}</div>
-                        </div>
-                        <div class="toggle-switch ${alarm.enabled ? 'active' : ''}" onclick="toggleAlarm(${alarm.id})">
-                            <div class="toggle-slider"></div>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function showFamilyAlarmForm() {
-            showAlarmForm();
-            document.getElementById('formTitle').textContent = 'Novo Alarme Familiar';
-        }
-
-        function copyFamilyCode() {
-            if (familyData) {
-                navigator.clipboard?.writeText(familyData.code);
-                showNotification('Copiado!', 'Código copiado para a área de transferência');
-            }
-        }
-
-        function leaveFamily() {
-            if (confirm('Deseja realmente sair da família?')) {
-                familyData = null;
-                currentUser = null;
-                document.getElementById('familyStatus').style.display = 'none';
-                saveToStorage();
-                renderFamilyView();
-                showNotification('Saída', 'Você saiu da família');
-            }
-        }
-
-        // Funções de sono
-        function calculateSleepRecommendations() {
-            const wakeTime = document.getElementById('targetWakeTime').value;
-            const [wakeHour, wakeMinute] = wakeTime.split(':').map(Number);
-            
-            const recommendations = [];
-            
-            [6, 7, 8, 9].forEach(sleepHours => {
-                const totalMinutes = (sleepHours * 60) + 15; // 15 min para adormecer
-                
-                const wakeDate = new Date();
-                wakeDate.setHours(wakeHour, wakeMinute, 0, 0);
-                
-                const bedtime = new Date(wakeDate.getTime() - (totalMinutes * 60 * 1000));
-                if (bedtime > wakeDate) {
-                    bedtime.setDate(bedtime.getDate() - 1);
-                }
-                
-                const bedtimeStr = bedtime.toTimeString().slice(0, 5);
-                
-                recommendations.push({
-                    hours: sleepHours,
-                    bedtime: bedtimeStr,
-                    quality: sleepHours === 8 ? 'Ideal' : sleepHours < 7 ? 'Pouco' : 'Bom'
-                });
-            });
-            
-            const container = document.getElementById('sleepRecommendations');
-            container.innerHTML = recommendations.map(rec => `
-                <div class="card" style="margin-bottom: 12px; padding: 16px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <div style="font-weight: 600; font-size: 1.1rem;">${rec.hours}h de sono</div>
-                            <div style="font-size: 0.8rem; opacity: 0.7;">${rec.quality}</div>
-                        </div>
-                        <div style="text-align: right;">
-                            <div style="font-size: 1.3rem; font-weight: 600;">${rec.bedtime}</div>
-                            <div style="font-size: 0.8rem; opacity: 0.7;">hora de dormir</div>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function createSleepAlarms() {
-            const wakeTime = document.getElementById('targetWakeTime').value;
-            const [wakeHour, wakeMinute] = wakeTime.split(':').map(Number);
-            
-            // Alarme para dormir (8h de sono + 15min)
-            const totalMinutes = (8 * 60) + 15;
-            const wakeDate = new Date();
-            wakeDate.setHours(wakeHour, wakeMinute, 0, 0);
-            const bedtime = new Date(wakeDate.getTime() - (totalMinutes * 60 * 1000));
-            if (bedtime > wakeDate) {
-                bedtime.setDate(bedtime.getDate() - 1);
-            }
-            const bedtimeStr = bedtime.toTimeString().slice(0, 5);
-            
-            // Criar os dois alarmes
-            alarms.push({
-                id: Date.now(),
-                time: bedtimeStr,
-                label: 'Hora de Dormir',
-                sound: 'suave',
-                enabled: true,
-                repeat: [],
-                familyAlarm: false
-            });
-            
-            alarms.push({
-                id: Date.now() + 1,
-                time: wakeTime,
-                label: 'Despertar',
-                sound: 'energetico',
-                enabled: true,
-                repeat: [],
-                familyAlarm: false
-            });
-            
-            saveToStorage();
-            showNotification('Sucesso', 'Alarmes de sono criados!');
-            showTab('alarms');
-        }
-
-        // Funções de timer
-        function startTimer() {
-            const minutes = parseInt(document.getElementById('timerMinutes').value) || 0;
-            const seconds = parseInt(document.getElementById('timerSeconds').value) || 0;
-            
-            if (minutes === 0 && seconds === 0) return;
-            
-            timerSeconds = minutes * 60 + seconds;
-            isTimerRunning = true;
-            
-            document.getElementById('timerStartBtn').classList.add('hidden');
-            document.getElementById('timerPauseBtn').classList.remove('hidden');
-            
-            timerInterval = setInterval(() => {
-                timerSeconds--;
-                updateTimerDisplay();
-                
-                if (timerSeconds <= 0) {
-                    timerFinished();
-                }
-            }, 1000);
-        }
-
-        function pauseTimer() {
-            isTimerRunning = false;
-            clearInterval(timerInterval);
-            
-            document.getElementById('timerStartBtn').classList.remove('hidden');
-            document.getElementById('timerPauseBtn').classList.add('hidden');
-        }
-
-        function resetTimer() {
-            isTimerRunning = false;
-            clearInterval(timerInterval);
-            timerSeconds = 0;
-            
-            document.getElementById('timerStartBtn').classList.remove('hidden');
-            document.getElementById('timerPauseBtn').classList.add('hidden');
-            document.getElementById('timerDisplay').textContent = '00:00';
-        }
-
-        function updateTimerDisplay() {
-            const mins = Math.floor(timerSeconds / 60);
-            const secs = timerSeconds % 60;
-            const timeStr = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-            document.getElementById('timerDisplay').textContent = timeStr;
-        }
-
-        function timerFinished() {
-            resetTimer();
-            playAlarmSound('energetico', 0.6);
-            showNotification('Timer Finalizado!', 'Seu timer chegou ao fim.');
-            
-            if ('vibrate' in navigator) {
-                navigator.vibrate([500, 200, 500, 200, 500]);
-            }
-        }
-
-        // Funções de estatísticas
-        function showStats() {
-            updateStatsDisplay();
-            document.getElementById('statsModal').classList.remove('hidden');
-        }
-
-        function hideStats() {
-            document.getElementById('statsModal').classList.add('hidden');
-        }
-
-        function updateStatsDisplay() {
-            document.getElementById('alarmsUsedCount').textContent = stats.alarmsUsed;
-            document.getElementById('avgSleepTime').textContent = stats.avgSleepTime + 'h';
-        }
-
-        // Event Listeners
-        document.addEventListener('DOMContentLoaded', function() {
-            loadFromStorage();
-            
-            const targetWakeTime = document.getElementById('targetWakeTime');
-            if (targetWakeTime) {
-                targetWakeTime.addEventListener('change', calculateSleepRecommendations);
-            }
-
-            document.addEventListener('click', (e) => {
-                if (e.target.classList.contains('modal')) {
-                    hideStats();
-                    hideCreateFamily();
-                    hideJoinFamily();
-                }
-            });
-
-            document.addEventListener('click', initAudio, { once: true });
-            document.addEventListener('touchstart', initAudio, { once: true });
-
-            if ('Notification' in window && Notification.permission === 'default') {
-                Notification.requestPermission();
-            }
+      // Solicita permissão
+      Notification.requestPermission()
+        .then(function(permission) {
+          if (permission === 'granted') {
+            notificationPermissionGranted = true;
+            hideNotificationBanner();
+            showNotification('Sucesso', 'Permissão para notificações concedida!');
+          } else if (permission === 'denied') {
+            showNotification('Permissão Negada', 'Você pode ativar depois nas configurações do navegador');
+          } else {
+            showNotification('Aviso', 'Permissão para notificações não foi concedida');
+          }
+        })
+        .catch(function(error) {
+          console.error('Erro ao solicitar permissão:', error);
+          showNotification('Erro', 'Erro ao solicitar permissão para notificações');
         });
+    }
 
-        // Salvar automaticamente quando a janela é fechada
-        window.addEventListener('beforeunload', saveToStorage);
+    function showNotificationBanner() {
+      const permission = checkNotificationPermission();
+      const banner = document.getElementById('notificationBanner');
+      
+      if (permission === 'default' || permission === 'denied') {
+        banner.classList.remove('hidden');
+      } else {
+        banner.classList.add('hidden');
+      }
+    }
 
-        // Salvar periodicamente
-        setInterval(saveToStorage, 30000);
+    function hideNotificationBanner() {
+      const banner = document.getElementById('notificationBanner');
+      banner.classList.add('hidden');
+    }
 
-        // Função de inicialização
-        function initializeApp() {
-            setInterval(updateTime, 1000);
-            updateTime();
-            
-            // Aplicar configurações carregadas
-            if (isDarkMode) {
-                document.body.className = 'dark-theme';
-                const themeIcon = document.querySelector('[onclick="toggleTheme()"] svg path');
-                if (themeIcon) {
-                    themeIcon.setAttribute('d', 'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z');
-                }
-            }
-            
-            if (familyData) {
-                document.getElementById('familyStatus').style.display = 'flex';
-                document.getElementById('familyName').textContent = familyData.name;
-            }
-            
-            showTab(currentTab);
-            renderAlarms();
-            updateStatsDisplay();
-            calculateSleepRecommendations();
+    // ===== FUNÇÕES DE ARMAZENAMENTO =====
+    function saveToStorage() {
+      const data = {
+        alarms,
+        familyData,
+        currentUser,
+        stats,
+        isDarkMode,
+        currentTab,
+        notificationPermissionGranted
+      };
+      try {
+        localStorage.setItem('alarmePro', JSON.stringify(data));
+      } catch (e) {
+        console.error('Erro ao salvar dados:', e);
+        // Fallback para cookies se localStorage não funcionar
+        try {
+          const dataStr = JSON.stringify(data);
+          document.cookie = `alarmePro=${encodeURIComponent(dataStr)}; expires=Fri, 31 Dec 2099 23:59:59 GMT; path=/`;
+        } catch (cookieError) {
+          console.error('Erro ao salvar dados via cookie:', cookieError);
+        }
+      }
+    }
+
+    function loadFromStorage() {
+      try {
+        // Tentar localStorage primeiro
+        const data = localStorage.getItem('alarmePro');
+        if (data) {
+          const parsed = JSON.parse(data);
+          alarms = parsed.alarms || [];
+          familyData = parsed.familyData || null;
+          currentUser = parsed.currentUser || null;
+          Object.assign(stats, parsed.stats || {});
+          isDarkMode = parsed.isDarkMode || false;
+          currentTab = parsed.currentTab || 'alarms';
+          notificationPermissionGranted = parsed.notificationPermissionGranted || false;
+          return;
         }
 
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializeApp);
+        // Fallback para cookies
+        const cookies = document.cookie.split(';');
+        const alarmeCookie = cookies.find(cookie => cookie.trim().startsWith('alarmePro='));
+        if (alarmeCookie) {
+          const dataStr = decodeURIComponent(alarmeCookie.split('=')[1]);
+          const parsed = JSON.parse(dataStr);
+          alarms = parsed.alarms || [];
+          familyData = parsed.familyData || null;
+          currentUser = parsed.currentUser || null;
+          Object.assign(stats, parsed.stats || {});
+          isDarkMode = parsed.isDarkMode || false;
+          currentTab = parsed.currentTab || 'alarms';
+          notificationPermissionGranted = parsed.notificationPermissionGranted || false;
+        }
+      } catch (e) {
+        console.error('Erro ao carregar dados:', e);
+        alarms = [];
+        familyData = null;
+        currentUser = null;
+        notificationPermissionGranted = false;
+      }
+    }
+
+    // ===== FUNÇÕES DE ÁUDIO =====
+    function initAudio() {
+      if (!audioContext) {
+        try {
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        } catch(e) {
+          console.log('Áudio não suportado');
+        }
+      }
+    }
+
+    function playAlarmSound(type, volume = 0.3) {
+      if (!audioContext) return;
+      if (currentSound) {
+        try { currentSound.stop(); } catch(e){}
+      }
+      
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      switch(type) {
+        case 'classico': 
+          oscillator.frequency.setValueAtTime(800, audioContext.currentTime); 
+          break;
+        case 'suave': 
+          oscillator.type = 'sine'; 
+          oscillator.frequency.setValueAtTime(440, audioContext.currentTime); 
+          break;
+        case 'energetico': 
+          oscillator.type = 'square'; 
+          oscillator.frequency.setValueAtTime(1000, audioContext.currentTime); 
+          break;
+        case 'natureza': 
+          oscillator.type = 'triangle'; 
+          oscillator.frequency.setValueAtTime(330, audioContext.currentTime); 
+          break;
+      }
+      
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.1);
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 1);
+      currentSound = oscillator;
+    }
+
+    // ===== FUNÇÕES DE TEMPO =====
+    function updateTime() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', hour12: false });
+      const dateStr = now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+      document.getElementById('currentTime').textContent = timeStr;
+      document.getElementById('currentDate').textContent = dateStr;
+      checkAlarms(now);
+    }
+
+    function checkAlarms(now) {
+      const currentTimeStr = now.toTimeString().slice(0, 5);
+      const currentDay = now.getDay();
+      
+      alarms.forEach((alarm, index) => {
+        if (alarm.enabled && alarm.time === currentTimeStr) {
+          if (alarm.repeat.length === 0 || alarm.repeat.includes(currentDay)) {
+            triggerAlarm(alarm);
+            if (alarm.repeat.length === 0) {
+              alarms.splice(index, 1);
+              stats.alarmsUsed++;
+              saveToStorage();
+              renderAlarms();
+            }
+          }
+        }
+      });
+    }
+
+    function triggerAlarm(alarm) {
+      playAlarmSound(alarm.sound, 0.5);
+      
+      if ('vibrate' in navigator) {
+        navigator.vibrate([300, 100, 300, 100, 300]);
+      }
+      
+      // Mostrar notificação visual no app
+      showNotification(`Alarme: ${alarm.label}`, alarm.time);
+      
+      // Tentar mostrar notificação nativa do browser
+      if (checkNotificationPermission() === 'granted') {
+        try {
+          const notification = new Notification(`Alarme: ${alarm.label}`, {
+            body: `Hora: ${alarm.time}`,
+            icon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDIyQzE3LjUyMjggMjIgMjIgMTcuNTIyOCAyMiAxMkMyMiA2LjQ3NzE1IDE3LjUyMjggMiAxMiAyQzYuNDc3MTUgMiAyIDYuNDc3MTUgMiAxMkMyIDE3LjUyMjggNi40NzcxNSAyMiAxMiAyMloiIGZpbGw9IiM2NjdlZWEiLz4KPHBhdGggZD0iTTEyIDZWMTJMMTYgMTQiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+Cjwvc3ZnPgo=',
+            vibrate: [200, 100, 200],
+            requireInteraction: true
+          });
+          
+          notification.onclick = function() {
+            window.focus();
+            notification.close();
+          };
+          
+          setTimeout(() => {
+            notification.close();
+          }, 10000);
+        } catch (error) {
+          console.error('Erro ao mostrar notificação:', error);
+        }
+      }
+      
+      setTimeout(() => {
+        if (confirm(`Alarme: ${alarm.label}\n${alarm.time}\n\nParar alarme?`)) {
+          if (currentSound) { 
+            try { currentSound.stop(); } catch(e){} 
+          }
+        }
+      }, 1000);
+    }
+
+    // ===== FUNÇÕES DE INTERFACE =====
+    function showNotification(title, message) {
+      const notification = document.createElement('div');
+      notification.className = 'notification';
+      notification.innerHTML = `
+        <div style="font-weight:600; margin-bottom:4px;">${title}</div>
+        <div style="font-size:0.9rem; opacity:0.8;">${message}</div>
+      `;
+      document.body.appendChild(notification);
+      setTimeout(() => {
+        if (notification.parentNode) notification.remove();
+      }, 4000);
+    }
+
+    function toggleTheme() {
+      isDarkMode = !isDarkMode;
+      document.body.className = isDarkMode ? 'dark-theme' : 'light-theme';
+      saveToStorage();
+      
+      const themeIcon = document.querySelector('[onclick="toggleTheme()"] svg path');
+      if (themeIcon) {
+        if (isDarkMode) {
+          themeIcon.setAttribute('d', 'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z');
         } else {
-            initializeApp();
+          themeIcon.setAttribute('d', 'M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z');
         }
-    </script>
+      }
+    }
+
+    function showTab(tabName) {
+      currentTab = tabName;
+      saveToStorage();
+      
+      // Atualizar botões de aba
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-selected', 'false');
+        btn.setAttribute('tabindex', '-1');
+      });
+      
+      const targetTab = [...document.querySelectorAll('.tab-btn')].find(btn => 
+        btn.textContent.toLowerCase() === tabName
+      );
+      if (targetTab) {
+        targetTab.classList.add('active');
+        targetTab.setAttribute('aria-selected', 'true');
+        targetTab.setAttribute('tabindex', '0');
+      }
+      
+      // Mostrar view correspondente
+      document.querySelectorAll('.view').forEach(view => view.classList.add('hidden'));
+      const targetView = document.getElementById(`${tabName}Tab`);
+      if (targetView) targetView.classList.remove('hidden');
+      
+      // Atualizar conteúdo específico
+      if (tabName === 'alarms') renderAlarms();
+      else if (tabName === 'sleep') calculateSleepRecommendations();
+      else if (tabName === 'family') renderFamilyView();
+    }
+
+    function showView(viewId) {
+      document.querySelectorAll('.view').forEach(view => view.classList.add('hidden'));
+      const targetView = document.getElementById(viewId);
+      if (targetView) targetView.classList.remove('hidden');
+    }
+
+    // ===== FUNÇÕES DE ALARME =====
+    function showAlarmForm(alarm = null) {
+      editingAlarm = alarm;
+      document.getElementById('formTitle').textContent = alarm ? 'Editar Alarme' : 'Novo Alarme';
+      
+      if (alarm) {
+        document.getElementById('alarmTime').value = alarm.time;
+        document.getElementById('alarmLabel').value = alarm.label;
+        document.getElementById('alarmSound').value = alarm.sound;
+      } else {
+        document.getElementById('alarmTime').value = '07:00';
+        document.getElementById('alarmLabel').value = 'Despertar';
+        document.getElementById('alarmSound').value = 'classico';
+      }
+      
+      showView('alarmForm');
+    }
+
+    function saveAlarm() {
+      const time = document.getElementById('alarmTime').value;
+      const label = (document.getElementById('alarmLabel').value || 'Alarme').trim();
+      const sound = document.getElementById('alarmSound').value;
+      
+      if (!time || label.length === 0) {
+        alert('Preencha horário e nome do alarme.');
+        return;
+      }
+      
+      const alarmData = {
+        time, 
+        label, 
+        sound, 
+        enabled: true, 
+        repeat: [],
+        familyAlarm: false,
+        id: editingAlarm ? editingAlarm.id : Date.now()
+      };
+      
+      if (editingAlarm) {
+        const idx = alarms.findIndex(a => a.id === editingAlarm.id);
+        if (idx !== -1) alarms[idx] = alarmData;
+      } else {
+        alarms.push(alarmData);
+      }
+      
+      editingAlarm = null;
+      saveToStorage();
+      renderAlarms();
+      showTab('alarms');
+      showNotification('Sucesso', 'Alarme salvo com sucesso!');
+      
+      // Solicitar permissão de notificação se for o primeiro alarme
+      if (alarms.length === 1 && checkNotificationPermission() !== 'granted') {
+        setTimeout(() => {
+          if (confirm('Deseja receber notificações quando os alarmes dispararem?')) {
+            requestNotificationPermission();
+          }
+        }, 1000);
+      }
+    }
+
+    function renderAlarms() {
+      const container = document.getElementById('alarmsList');
+      const emptyState = document.getElementById('emptyState');
+      
+      if (!container || !emptyState) return;
+      
+      if (alarms.length === 0) {
+        container.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+      
+      emptyState.classList.add('hidden');
+      container.innerHTML = alarms.map(alarm => `
+        <div class="alarm-item" tabindex="0" aria-label="Alarme ${alarm.label} às ${alarm.time}">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div style="flex:1;">
+              <div class="alarm-time">${alarm.time}</div>
+              <div style="margin-bottom:8px; font-weight:600; font-size:1.1rem;">${alarm.label}</div>
+              ${alarm.familyAlarm ? '<div style="font-size:0.8rem; color:#f093fb; font-weight:600;">👨‍👩‍👧‍👦 Alarme Familiar</div>' : ''}
+            </div>
+            <div style="display:flex; align-items:center; gap:12px;">
+              <button onclick="editAlarm(${alarm.id})" aria-label="Editar alarme ${alarm.label}" 
+                      style="background:var(--glass); border:1px solid var(--glass-border); cursor:pointer; padding:10px; border-radius:12px; color:inherit;">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+              </button>
+              <button onclick="deleteAlarm(${alarm.id})" aria-label="Excluir alarme ${alarm.label}" 
+                      style="background:var(--glass); border:1px solid var(--glass-border); cursor:pointer; padding:10px; color:#ff416c; border-radius:12px;">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+              </button>
+              <div class="toggle-switch ${alarm.enabled ? 'active' : ''}" 
+                   onclick="toggleAlarm(${alarm.id})" 
+                   role="switch" aria-checked="${alarm.enabled}" tabindex="0" 
+                   onkeypress="if(event.key==='Enter') toggleAlarm(${alarm.id})">
+                <div class="toggle-slider"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function editAlarm(id) {
+      const alarm = alarms.find(a => a.id === id);
+      if (alarm) showAlarmForm(alarm);
+    }
+
+    function deleteAlarm(id) {
+      if (confirm('Deseja excluir este alarme?')) {
+        alarms = alarms.filter(a => a.id !== id);
+        saveToStorage();
+        renderAlarms();
+        showNotification('Sucesso', 'Alarme excluído!');
+      }
+    }
+
+    function toggleAlarm(id) {
+      const alarm = alarms.find(a => a.id === id);
+      if (!alarm) return;
+      alarm.enabled = !alarm.enabled;
+      saveToStorage();
+      renderAlarms();
+    }
+
+    // ===== FUNÇÕES DE FAMÍLIA =====
+    function generateFamilyCode() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let code = '';
+      for(let i = 0; i < 6; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return code;
+    }
+
+    function renderFamilyView() {
+      if(familyData) {
+        document.getElementById('familyHome').classList.add('hidden');
+        document.getElementById('familyDashboard').classList.remove('hidden');
+        updateFamilyDashboard();
+      } else {
+        document.getElementById('familyHome').classList.remove('hidden');
+        document.getElementById('familyDashboard').classList.add('hidden');
+      }
+    }
+
+    function showCreateFamily() {
+      document.getElementById('createFamilyModal').classList.remove('hidden');
+    }
+
+    function hideCreateFamily() {
+      document.getElementById('createFamilyModal').classList.add('hidden');
+    }
+
+    function showJoinFamily() {
+      document.getElementById('joinFamilyModal').classList.remove('hidden');
+    }
+
+    function hideJoinFamily() {
+      document.getElementById('joinFamilyModal').classList.add('hidden');
+    }
+
+    function createFamily() {
+      const familyName = document.getElementById('newFamilyName').value.trim();
+      const adminName = document.getElementById('adminName').value.trim();
+      if(!familyName || !adminName) {
+        showNotification('Erro', 'Preencha todos os campos');
+        return;
+      }
+      const familyCode = generateFamilyCode();
+      familyData = {
+        name: familyName,
+        code: familyCode,
+        admin: adminName,
+        members: [{name: adminName, role: 'Admin', id: 1, online:true}],
+        alarms: []
+      };
+      currentUser = {name: adminName, role:'Admin', id: 1};
+      document.getElementById('familyStatus').style.display = 'flex';
+      document.getElementById('familyName').textContent = familyName;
+      saveToStorage();
+      hideCreateFamily();
+      renderFamilyView();
+      showNotification('Sucesso', `Família "${familyName}" criada! Código: ${familyCode}`);
+    }
+
+    function joinFamily() {
+      const familyCode = document.getElementById('familyCode').value.toUpperCase().trim();
+      const memberName = document.getElementById('memberName').value.trim();
+      if(!familyCode || !memberName) {
+        showNotification('Erro', 'Preencha todos os campos');
+        return;
+      }
+      // Simulação de entrada
+      familyData = {
+        name: 'Família Silva',
+        code: familyCode,
+        admin: 'João Silva',
+        members: [
+          {name: 'João Silva', role: 'Admin', id: 1, online:true},
+          {name: memberName, role: 'Membro', id: 2, online:true}
+        ],
+        alarms: []
+      };
+      currentUser = {name: memberName, role: 'Membro', id: 2};
+      document.getElementById('familyStatus').style.display = 'flex';
+      document.getElementById('familyName').textContent = 'Família Silva';
+      saveToStorage();
+      hideJoinFamily();
+      renderFamilyView();
+      showNotification('Sucesso', `Bem-vindo à Família Silva!`);
+    }
+
+    function updateFamilyDashboard() {
+      if(!familyData) return;
+      document.getElementById('dashboardFamilyName').textContent = familyData.name;
+      document.getElementById('familyCodeDisplay').textContent = familyData.code;
+      const memberList = document.getElementById('memberList');
+      memberList.innerHTML = familyData.members.map(member => `
+        <div class="member-item">
+          <div class="member-avatar">${member.name.charAt(0)}</div>
+          <div style="flex: 1;">
+            <div style="font-weight: 600;">${member.name}</div>
+            <div style="font-size: 0.8rem; opacity: 0.7;">${member.role}</div>
+          </div>
+          <div style="color: ${member.online ? '#4ade80' : '#64748b'}; font-size: 0.8rem;">
+            ${member.online ? 'Online' : 'Offline'}
+          </div>
+        </div>
+      `).join('');
+      renderFamilyAlarms();
+    }
+
+    function renderFamilyAlarms() {
+      const container = document.getElementById('familyAlarmsList');
+      const familyAlarms = alarms.filter(alarm => alarm.familyAlarm);
+      if(familyAlarms.length === 0) {
+        container.innerHTML = '<div class="empty-state" style="padding:40px 20px;"><p>Nenhum alarme familiar criado</p></div>';
+        return;
+      }
+      container.innerHTML = familyAlarms.map(alarm => `
+        <div class="alarm-item" style="margin-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:1.3rem; font-weight:600; margin-bottom:4px;">${alarm.time}</div>
+              <div style="font-size:0.9rem;">${alarm.label}</div>
+            </div>
+            <div class="toggle-switch ${alarm.enabled ? 'active' : ''}" onclick="toggleAlarm(${alarm.id})">
+              <div class="toggle-slider"></div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function showFamilyAlarmForm() {
+      showAlarmForm();
+      document.getElementById('formTitle').textContent = 'Novo Alarme Familiar';
+    }
+
+    function copyFamilyCode() {
+      if(familyData) {
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(familyData.code).then(() => {
+            showNotification('Copiado!', 'Código copiado para área de transferência');
+          }).catch(() => {
+            fallbackCopyText(familyData.code);
+          });
+        } else {
+          fallbackCopyText(familyData.code);
+        }
+      }
+    }
+
+    function fallbackCopyText(text) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        showNotification('Copiado!', 'Código copiado para área de transferência');
+      } catch (err) {
+        showNotification('Erro', 'Não foi possível copiar o código');
+      }
+      document.body.removeChild(textArea);
+    }
+
+    function leaveFamily() {
+      if(confirm('Deseja realmente sair da família?')) {
+        familyData = null;
+        currentUser = null;
+        document.getElementById('familyStatus').style.display = 'none';
+        saveToStorage();
+        renderFamilyView();
+        showNotification('Saída', 'Você saiu da família');
+      }
+    }
+
+    // ===== FUNÇÕES DE SONO =====
+    function calculateSleepRecommendations() {
+      const wakeTime = document.getElementById('targetWakeTime').value;
+      if(!wakeTime) return;
+      const [wakeHour, wakeMinute] = wakeTime.split(':').map(Number);
+      const recommendations = [];
+      [6,7,8,9].forEach(h => {
+        const totalMin = h*60 + 15;
+        const wakeDate = new Date();
+        wakeDate.setHours(wakeHour,wakeMinute,0,0);
+        const bedtime = new Date(wakeDate.getTime() - totalMin*60000);
+        if(bedtime > wakeDate) bedtime.setDate(bedtime.getDate() - 1);
+        const bedtimeStr = bedtime.toTimeString().slice(0,5);
+        recommendations.push({
+          hours: h,
+          bedtime: bedtimeStr,
+          quality: h === 8 ? 'Ideal' : h < 7 ? 'Pouco' : 'Bom'
+        });
+      });
+      const container = document.getElementById('sleepRecommendations');
+      container.innerHTML = recommendations.map(r => `
+        <div class="card" style="margin-bottom:12px; padding:16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-weight:600; font-size:1.1rem;">${r.hours}h de sono</div>
+              <div style="font-size:0.8rem; opacity:0.7;">${r.quality}</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:1.3rem; font-weight:600;">${r.bedtime}</div>
+              <div style="font-size:0.8rem; opacity:0.7;">hora de dormir</div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function createSleepAlarms() {
+      const wakeTime = document.getElementById('targetWakeTime').value;
+      if(!wakeTime) {
+        alert('Escolha a hora para acordar.');
+        return;
+      }
+      const [wakeHour,wakeMinute] = wakeTime.split(':').map(Number);
+      const totalMin = 8*60 + 15;
+      const wakeDate = new Date();
+      wakeDate.setHours(wakeHour,wakeMinute,0,0);
+      let bedtime = new Date(wakeDate.getTime() - totalMin*60000);
+      if(bedtime > wakeDate) bedtime.setDate(bedtime.getDate() - 1);
+      const bedtimeStr = bedtime.toTimeString().slice(0,5);
+      alarms.push({id:Date.now(), time: bedtimeStr, label:'Hora de Dormir', sound:'suave', enabled:true, repeat:[], familyAlarm:false});
+      alarms.push({id:Date.now()+1, time: wakeTime, label:'Despertar', sound:'energetico', enabled:true, repeat:[], familyAlarm:false});
+      saveToStorage();
+      showNotification('Sucesso','Alarmes de sono criados!');
+      showTab('alarms');
+    }
+
+    // ===== FUNÇÕES DE TIMER =====
+    function startTimer() {
+      const minutes = parseInt(document.getElementById('timerMinutes').value) || 0;
+      const seconds = parseInt(document.getElementById('timerSeconds').value) || 0;
+      if(minutes===0 && seconds===0) return;
+      timerSeconds = minutes*60 + seconds;
+      isTimerRunning = true;
+      document.getElementById('timerStartBtn').classList.add('hidden');
+      document.getElementById('timerPauseBtn').classList.remove('hidden');
+      timerInterval = setInterval(() => {
+        timerSeconds--;
+        updateTimerDisplay();
+        if(timerSeconds<=0) timerFinished();
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      isTimerRunning=false;
+      clearInterval(timerInterval);
+      document.getElementById('timerStartBtn').classList.remove('hidden');
+      document.getElementById('timerPauseBtn').classList.add('hidden');
+    }
+
+    function resetTimer() {
+      isTimerRunning=false;
+      clearInterval(timerInterval);
+      timerSeconds=0;
+      document.getElementById('timerStartBtn').classList.remove('hidden');
+      document.getElementById('timerPauseBtn').classList.add('hidden');
+      document.getElementById('timerDisplay').textContent='00:00';
+    }
+
+    function updateTimerDisplay() {
+      const mins = Math.floor(timerSeconds/60);
+      const secs = timerSeconds % 60;
+      const str = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+      document.getElementById('timerDisplay').textContent = str;
+    }
+
+    function timerFinished() {
+      resetTimer();
+      playAlarmSound('energetico',0.6);
+      showNotification('Timer Finalizado!','Seu timer chegou ao fim.');
+      if('vibrate' in navigator) navigator.vibrate([500,200,500,200,500]);
+    }
+
+    // ===== FUNÇÕES DE ESTATÍSTICAS =====
+    function showStats() {
+      updateStatsDisplay();
+      document.getElementById('statsModal').classList.remove('hidden');
+    }
+
+    function hideStats() {
+      document.getElementById('statsModal').classList.add('hidden');
+    }
+
+    function updateStatsDisplay() {
+      document.getElementById('alarmsUsedCount').textContent = stats.alarmsUsed;
+      document.getElementById('avgSleepTime').textContent = stats.avgSleepTime+'h';
+    }
+
+    // ===== INICIALIZAÇÃO =====
+    function initializeApp() {
+      // Carregar dados salvos
+      loadFromStorage();
+      
+      // Configurar timer de atualização
+      setInterval(updateTime, 1000);
+      updateTime();
+      
+      // Aplicar tema
+      if (isDarkMode) {
+        document.body.className = 'dark-theme';
+        const icon = document.querySelector('[onclick="toggleTheme()"] svg path');
+        if (icon) icon.setAttribute('d', 'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z');
+      }
+      
+      // Configurar status familiar
+      if (familyData) {
+        document.getElementById('familyStatus').style.display = 'flex';
+        document.getElementById('familyName').textContent = familyData.name;
+      }
+      
+      // Verificar permissão de notificações
+      const permission = checkNotificationPermission();
+      if (permission === 'granted') {
+        notificationPermissionGranted = true;
+        hideNotificationBanner();
+      } else if (permission === 'default' || permission === 'denied') {
+        showNotificationBanner();
+      }
+      
+      // Mostrar aba atual
+      showTab(currentTab);
+      
+      // Renderizar componentes
+      renderAlarms();
+      updateStatsDisplay();
+      calculateSleepRecommendations();
+    }
+
+    // ===== EVENT LISTENERS =====
+    document.addEventListener('DOMContentLoaded', initializeApp);
+
+    // Event listeners diversos
+    document.addEventListener('click', e => {
+      if (e.target.classList.contains('modal')) {
+        hideStats();
+        hideCreateFamily();
+        hideJoinFamily();
+      }
+    });
+
+    document.addEventListener('click', initAudio, { once: true });
+    document.addEventListener('touchstart', initAudio, { once: true });
+
+    // Salvar antes de sair
+    window.addEventListener('beforeunload', saveToStorage);
+
+    // Salvar periodicamente
+    setInterval(saveToStorage, 30000);
+
+    // Event listener para calculadora de sono
+    document.addEventListener('DOMContentLoaded', function() {
+      const wakeInput = document.getElementById('targetWakeTime');
+      if (wakeInput) wakeInput.addEventListener('change', calculateSleepRecommendations);
+    });
+  </script>
 </body>
 </html>
